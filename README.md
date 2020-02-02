@@ -5,7 +5,7 @@ A collection of useful and useless things to support C++ CLI design
 
 
 # Why
-I hate `getopt`, I wanted the cleanest argument parser possible, so I wrote this first version of `optionProcessor.h`. I thought it would fit well in a toolkit to support CLI designs so I figured I might starting gathering a few things here for that purpose.
+I hate `getopt`, I wanted the cleanest argument parser possible, so I wrote this first version of `optionProcessor.h`. I thought it would fit well in a toolkit to support CLI designs so I figured I might start gathering a few things here for that purpose.
 
 # What's in it?
 This is not "low-level zero overhead black-magic" code. The mindset here is to promote readability and flexibility. So far, the elements contained in the kit are :
@@ -26,16 +26,16 @@ Include `optionProcessor.h` to your project to make your life simpler.
 
       ...
 
-* Any argument of your program starting with a `-` will be detected as an option and the following words as the option's argument.
+* Any argument of your program starting with a `-` will be detected as an option and the following words as option arguments.
 * Options are defined with the `OPTION` and `OPTION2` macros, which should be provided one or two string and a function body.
 * Within that function body, `option.arguments` contains a string vector of option arguments.
-* `BADOPTIONS` is optional and is called if a non-defined options are detected. Their names are provided in `option.arguments`.
+* `BADOPTIONS` is optional and is called if non-defined options are detected. Their names are provided in `option.arguments`.
 
 ## CLI animations
 The following elements can be found in `cliAnimations.h`
 
 ### Spinner
-A `Spinner` object to load with the sprite sequence you want it to show. Sprites are `std::string`s and can be of different length.
+A `Spinner` object to load with the sprite sequence of your choice. Sprites can be strings of different length.
 
     Spinner spin({ "-", "\\", "|", "/" });
     while(1) { cout << '\r' << spin() << flush; this_thread::sleep_for(100ms); }
@@ -45,7 +45,7 @@ A `Spinner` object to load with the sprite sequence you want it to show. Sprites
 ### Loading bar
 The `LoadingBar` object has a few options :
 * Adjustable length
-* Toggle percentage display
+* Togglable percentage display
 * Customizable loaded/not-loaded symbols
 * Can have a `Spinner`
 
