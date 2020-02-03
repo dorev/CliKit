@@ -12,16 +12,17 @@ int main(int argc, char** argv)
   //
   // Setup and process arguments
   //
+  getchar();
 
-  std::cout << "Arguments : ";
-  for (int i = 1; i < argc; ++i)
+  std::cout << "Command line : ";
+  for (int i = 0; i < argc; ++i)
     std::cout << argv[i] << " ";
   std::cout << "\n";
 
   ProcessOptions(argc, argv)({
     BADOPTIONS(
     {
-      std::cout << "\nBad options : ";
+      std::cout << "\nBad options detected : ";
       for (auto& arg : option.arguments)
         std::cout << arg << " ";
       std::cout << "(we could print usage and exit program)";
@@ -29,16 +30,24 @@ int main(int argc, char** argv)
 
     OPTION("-a", 
     {
-      std::cout << "\noption -a with argument ";
-      for (auto& arg : option.arguments)
-        std::cout << arg << " ";
+      std::cout << "\n-a option";
+      if (option.arguments.size())
+      {
+        std::cout << " with arguments : ";
+        for (auto& arg : option.arguments)
+          std::cout << arg << " ";
+      }
     }),
 
     OPTION2("-b", "--blong", 
     {
-      std::cout << "\noption "<< option.name << " with argument ";
-      for (auto& arg : option.arguments)
-        std::cout << arg << " ";
+      std::cout << "\n-b/--blong option";
+      if (option.arguments.size())
+      {
+        std::cout << " with arguments : ";
+        for (auto& arg : option.arguments)
+          std::cout << arg << " ";
+      }
     })
   });
    
@@ -52,12 +61,12 @@ int main(int argc, char** argv)
   float progress = 0;
   while (progress < 1)
   {
-    std::cout << "\r" << load(progress);
-    progress += 0.03;
+    std::cout << "\r" << load(progress) << std::flush;
+    progress += 0.05;
 
     std::this_thread::sleep_for(100ms);
   }
-  std::cout << "\r" << load(1);
+  std::cout << "\r" << load(1) << std::flush;
 
   //
   // Custom loading bar
@@ -66,17 +75,25 @@ int main(int argc, char** argv)
   std::cout << "\n\nCustom loading bar :\n";
 
   Spinner spinner({ "=>", "=<>", "===<", "====<", "===<",  "=<>", "=>" });
-  LoadingBar loadCustom(' ', '-', 60, false, spinner);
+  LoadingBar loadCustom(' ', '-', 40, false, spinner);
 
   progress = 0;
   while (progress < 1)
   {
-    std::cout << "\r" << loadCustom(progress);
-    progress += 0.03;
+    std::string msg = "";
+
+    if (progress > 0.5)
+      msg = "Getting there...";
+
+    if (progress > 0.75)
+      msg = "Almost done ... ";
+
+    std::cout << "\r" << loadCustom(progress, msg) << std::flush;
+    progress += 0.05;
 
     std::this_thread::sleep_for(100ms);
   }
-  std::cout << "\r" << loadCustom(1);
+  std::cout << "\r" << loadCustom(1, "Done!           ") << std::flush;
 
   getchar();
 

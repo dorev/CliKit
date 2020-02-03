@@ -6,6 +6,11 @@
 #include <functional>
 #include <algorithm>
 
+/*
+  ProcessOptions is a functor constructed with argc/argv
+  and given a list of OptionDefinitions used to parse argv. 
+*/
+
 struct Option
 {
   std::string name;
@@ -20,33 +25,30 @@ struct OptionDefinition
 
 struct ProcessOptions
 {
-  std::vector<std::string> _cl;
-  std::vector<Option> _options;
-  int _i = 0;
   int _argc;
   char** _argv;
-
-  ProcessOptions() {}
+  int _argvIndex;
+  std::vector<std::string> _commandLine;
+  std::vector<Option> _options;
 
   ProcessOptions(int argc, char** argv)
     : _argc(argc)
     , _argv(argv)
+    , _argvIndex(0)
   {
+    // Skip argv[0]
     for (int i = 1; i < argc; ++i)
-      _cl.push_back(argv[i]);
+      _commandLine.push_back(argv[i]);
 
     // Parse
-    while(_i < _argc - 1 && _cl[_i][0] == '-')
+    while(_argvIndex < _argc - 1 && _commandLine[_argvIndex][0] == '-')
     {
-      Option option;
-      option.name = _cl[_i];
-      ++_i;
+      Option option { _commandLine[_argvIndex++] };
 
-      while (_i < _argc - 1 && _cl[_i][0] != '-')
-      {
-        option.arguments.push_back(_cl[_i]);
-        ++_i;
-      }
+      // Extract each argv value with a '-' as an option 
+      while (_argvIndex < _argc - 1 && _commandLine[_argvIndex][0] != '-')
+        option.arguments.push_back(_commandLine[_argvIndex++]);
+
       _options.push_back(option);
     }
   }
@@ -56,13 +58,13 @@ struct ProcessOptions
     std::vector<std::string> definedOptions;
 
     for(auto& option : optionDefinitions)
-    {
       for (auto& name : option.names)
         definedOptions.push_back(name);
-    }
 
-    // check if bad option is present
+    // Shortcut for find/find_if algorithms
     #define ALL(x) x.begin(), x.end() 
+
+    // Check if "Bad Options" is present
     auto badOptionItr = std::find_if(ALL(optionDefinitions), [&](const OptionDefinition& definition)
     {
       return std::find(ALL(definition.names), "Bad options") != definition.names.end();
@@ -70,14 +72,16 @@ struct ProcessOptions
 
     if (badOptionItr != optionDefinitions.end())
     {
-      Option badOption{ "Bad options" };
+      Option badOption { "Bad options" };
 
-      std::for_each(_cl.begin(), _cl.end(), [&](std::string& arg)
+      // List bad options names as "Bad Options" arguments
+      std::for_each(_commandLine.begin(), _commandLine.end(), [&](std::string& arg)
       {
         if (arg[0] == '-' && std::find(ALL(definedOptions), arg) == definedOptions.end())
           badOption.arguments.push_back(arg);
       });
 
+      // Run "Bad Options" lambda
       if (badOption.arguments.size())
         badOptionItr->lambda(badOption);
     }
@@ -85,11 +89,17 @@ struct ProcessOptions
     // Process valid options
     for (auto& option : _options)
     {
+      // For each defined options found in argv
       auto definitionItr = std::find_if(ALL(optionDefinitions), [&](const OptionDefinition& definition)
       {
-        return std::find_if(ALL(definition.names), [&](const std::string& definitionName) { return option.name == definitionName; }) != definition.names.end();
+        return std::find_if(ALL(definition.names), 
+          [&](const std::string& definitionName) 
+          { 
+            return option.name == definitionName; 
+          }) != definition.names.end();
       });
 
+      // Run option lambda
       if (definitionItr != optionDefinitions.end())
         definitionItr->lambda(option);
     }
@@ -97,7 +107,7 @@ struct ProcessOptions
   }
 };
 
-
+// Shortcut macros
 #define OPTION(opt,lambda) { { opt }, [&](const Option & option) lambda }
 #define OPTION2(opt1, opt2, lambda) { { opt1, opt2 }, [&](const Option & option) lambda }
 #define BADOPTIONS(lambda) { {"Bad options"}, [&](const Option & option) lambda }

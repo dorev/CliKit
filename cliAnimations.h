@@ -7,19 +7,21 @@
 struct Spinner
 {
   int _i = 0;
+  bool _empty;
   std::vector<std::string> _sprites;
-  Spinner(std::vector<std::string> sprites) : _sprites(sprites) {}
+
+  Spinner(std::vector<std::string> sprites) 
+    : _sprites(sprites) 
+    , _empty(sprites.size() == 0)
+  {}
+
   std::string operator()()
   {
-    return _sprites.size() == 0
-      ? ""
-      : _sprites[_i++ % _sprites.size()];
+    return _empty ? "" : _sprites[_i++ % _sprites.size()];
   }
   int spriteSize()
   {
-    return _sprites.size() == 0
-      ? 0
-      : _sprites[_i % _sprites.size()].size();
+    return _empty ? 0 : _sprites[_i % _sprites.size()].size();
   }
 };
 
@@ -33,80 +35,85 @@ struct LoadingBar
   char _notLoadedSymbol;
 
   LoadingBar()
-    : _spin({ "-", "\\", "|", "/" })
-    //: _spin({})
-    //: _spin({ "|-  |","| - |","|  -|","| - |" })
-    //: _spin({ "", "~", "<>", "<~>", "<==>", "<=~=>", "<-==->", "<=~=>", "<==>", "<~>", "<>", "{" })
-    , _length(20)
+    : _spin({ "-", "\\", "|", "/" }), _length(20)
     , _showPercentage(true)
     , _showSpinner(true)
     , _loadedSymbol('|')
     , _notLoadedSymbol(' ')
   {}
 
-  LoadingBar(char loadedSymbol, char notLoadedSymbol = ' ', int length = 20, bool showPercentage = true, Spinner spinner = Spinner({}))
+  LoadingBar( char loadedSymbol, 
+              char notLoadedSymbol = ' ', 
+              int length = 20, 
+              bool showPercentage = true, 
+              Spinner spinner = Spinner({}) )
     : _spin(spinner)
     , _length(length)
     , _showPercentage(showPercentage)
-    , _showSpinner(_spin._sprites.size() > 0)
+    , _showSpinner(!_spin._empty)
     , _loadedSymbol(loadedSymbol)
     , _notLoadedSymbol(notLoadedSymbol)
-  {}
-
+  {} 
 
   std::string operator()(float progress, std::string message = "")
   {
+    // Accumulator
     std::stringstream out;
 
     if (_showPercentage)
     {
-      std::string perc = std::to_string(static_cast<int>(progress * 100));
+      std::string perc(std::to_string(static_cast<int>(progress * 100)));
 
+      // Left pad with spaces
       while (perc.size() < 3)
         perc.insert(0, " ");
 
+      // Truncate overflow
       out << perc.substr(0, 3) << "% ";
     }
 
+    // Loading bar left end
     out << '[';
 
     int currentProgress = progress * _length;
-
     int effectiveSpinnerSize = 0;
 
     if (_showSpinner)
     {
-      effectiveSpinnerSize =
-        _length - currentProgress > _spin.spriteSize()
+      // Calculated to truncate overflow at the end of the loading bar
+      effectiveSpinnerSize = _length - currentProgress > _spin.spriteSize()
         ? _spin.spriteSize()
         : _length - currentProgress;
 
+      // Print progress symbols
       for (int i = 0; i < currentProgress; ++i)
         out << _loadedSymbol;
 
-      std::string str = _spin().substr(0, effectiveSpinnerSize);
-      out << str;
+      // Print potentially truncated spinner
+      out << _spin().substr(0, effectiveSpinnerSize);
     }
     else
     {
+      // Simply print progress symbols
       for (int i = 0; i < currentProgress; ++i)
         out << _loadedSymbol;
     }
 
-    int notLoaded =
-      _length - effectiveSpinnerSize - currentProgress < 0
+    // Print remaining spaces with remainder symbol
+    int remainingSpace = _length - effectiveSpinnerSize - currentProgress < 0
       ? 0
       : _length - effectiveSpinnerSize - currentProgress;
 
-    for (int i = 0; i < notLoaded; ++i)
+    for (int i = 0; i < remainingSpace; ++i)
       out << _notLoadedSymbol;
 
-    out << "] ";
-    if (message.size())
-    {
-      out << ' ' << message;
-    }
+    // Loading bar right end
+    out << "]";
 
+    // Add message if any
+    if (message.size())
+      out << " " << message;
+    
     return out.str();
   }
 

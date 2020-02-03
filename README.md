@@ -1,11 +1,10 @@
 # CliKit
 A collection of useful and useless things to support C++ CLI design
 
-![Demo](https://i.gyazo.com/8e4415c66ea0d16dce88e127792525a9.gif)
-
+![Demo](https://i.gyazo.com/42b7ae1457b7cea445db135d746acbea.gif)
 
 # Why
-I hate `getopt`, I wanted the cleanest argument parser possible, so I wrote this first version of `optionProcessor.h`. I thought it would fit well in a toolkit to support CLI designs so I figured I might start gathering a few things here for that purpose.
+I don't really like `getopt`, I wanted the cleanest argument parser possible, so I wrote this first version of `optionProcessor.h`. I thought it would fit well in a toolkit to support CLI designs so I figured I might start gathering a few things here for that purpose.
 
 # What's in it?
 This is not "low-level zero overhead black-magic" code. The mindset here is to promote readability and flexibility. So far, the elements contained in the kit are :
@@ -38,7 +37,11 @@ The following elements can be found in `cliAnimations.h`
 A `Spinner` object to load with the sprite sequence of your choice. Sprites can be strings of different length.
 
     Spinner spin({ "-", "\\", "|", "/" });
-    while(1) { cout << '\r' << spin() << flush; this_thread::sleep_for(100ms); }
+    while(1) 
+    { 
+      cout << '\r' << spin() << flush; 
+      sleep_for(100ms); 
+    }
     
 ![you spin me right round baby right round...!](https://i.gyazo.com/e2e125edb8b0fb0fe4e4f5c3872b5c94.gif)
 
@@ -58,8 +61,8 @@ Sample loader :
     {
       cout << '\r' << loader(progress);
       progress += 0.03;
-      this_thread::sleep_for(100ms);
+      sleep_for(100ms);
     }
     cout << '\r' << loader(1) << flush;
     
-![ths is safe for work](https://i.gyazo.com/1939e04f22e6c99e58c1963d39d2ba1c.gif)
+![this is safe for work](https://i.gyazo.com/1939e04f22e6c99e58c1963d39d2ba1c.gif)
