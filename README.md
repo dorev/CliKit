@@ -59,10 +59,10 @@ Sample loader :
 
     while (progress < 1)
     {
-      cout << '\r' << loader(progress);
+      cout << '\r' << loader(progress) << flush;
       progress += 0.03;
       sleep_for(100ms);
     }
     cout << '\r' << loader(1) << flush;
     
-![this is safe for work](https://i.gyazo.com/1939e04f22e6c99e58c1963d39d2ba1c.gif)
+![loading demo](https://i.gyazo.com/1939e04f22e6c99e58c1963d39d2ba1c.gif)
