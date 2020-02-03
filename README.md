@@ -8,7 +8,7 @@ I don't really like `getopt`, I wanted the cleanest argument parser possible, so
 
 # What's in it?
 This is not "low-level zero overhead black-magic" code. The mindset here is to promote readability and flexibility. So far, the elements contained in the kit are :
-* Option processor, to crunch your `argc` and `argc` buddies
+* Option processor, to crunch your `argc` and `argv` buddies
 * A spinner, with customizable sprites
 * A loading bar, in which you can put a spinner!
 
@@ -21,7 +21,7 @@ Include `optionProcessor.h` to your project to make your life simpler.
         BADOPTIONS (               { usage(); }),
         OPTION     ("-a",          { flag_a = true; }),
         OPTION2    ("-b", "--bye", { prepare(option.arguments); })
-        });
+      });
 
       ...
 
