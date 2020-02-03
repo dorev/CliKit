@@ -80,20 +80,12 @@ int main(int argc, char** argv)
   progress = 0;
   while (progress < 1)
   {
-    std::string msg = "";
-
-    if (progress > 0.5)
-      msg = "Getting there...";
-
-    if (progress > 0.75)
-      msg = "Almost done ... ";
-
-    std::cout << "\r" << loadCustom(progress, msg) << std::flush;
+    std::cout << "\r" << loadCustom(progress) << std::flush;
     progress += 0.05;
 
     std::this_thread::sleep_for(100ms);
   }
-  std::cout << "\r" << loadCustom(1, "Done!           ") << std::flush;
+  std::cout << "\r" << loadCustom(1) << std::flush;
 
   getchar();
 

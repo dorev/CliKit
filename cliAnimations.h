@@ -55,7 +55,7 @@ struct LoadingBar
     , _notLoadedSymbol(notLoadedSymbol)
   {} 
 
-  std::string operator()(float progress, std::string message = "")
+  std::string operator()(float progress)
   {
     // Accumulator
     std::stringstream out;
@@ -109,10 +109,6 @@ struct LoadingBar
 
     // Loading bar right end
     out << "]";
-
-    // Add message if any
-    if (message.size())
-      out << " " << message;
     
     return out.str();
   }
