@@ -4,7 +4,7 @@ A header-only collection of useful and useless things to support C++ CLI design
 ![Demo](https://i.imgur.com/AH3a7Ua.gif)
 
 # Why
-I don't really like `getopt`, I wanted the cleanest argument parser possible, so I wrote this first version of `optionProcessor.h`. I thought it would fit well in a toolkit to support CLI designs so I figured I might start gathering a few things here for that purpose.
+I don't really like `getopt`, I wanted the cleanest argument parser possible, so I wrote a first version of `ProcessOptions` and then a few other things. I gathered these together here, and then CliKit was born!
 
 # What's in it?
 This is not "low-level zero overhead black-magic" code. The mindset here is to promote readability and flexibility. So far, the elements contained in the kit are :
