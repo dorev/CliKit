@@ -1,7 +1,7 @@
 # CliKit
-A collection of useful and useless things to support C++ CLI design
+A header-only collection of useful and useless things to support C++ CLI design
 
-![Demo](https://i.gyazo.com/42b7ae1457b7cea445db135d746acbea.gif)
+![Demo](https://i.imgur.com/AH3a7Ua.gif)
 
 # Why
 I don't really like `getopt`, I wanted the cleanest argument parser possible, so I wrote this first version of `optionProcessor.h`. I thought it would fit well in a toolkit to support CLI designs so I figured I might start gathering a few things here for that purpose.
@@ -9,26 +9,45 @@ I don't really like `getopt`, I wanted the cleanest argument parser possible, so
 # What's in it?
 This is not "low-level zero overhead black-magic" code. The mindset here is to promote readability and flexibility. So far, the elements contained in the kit are :
 * Option processor, to crunch your `argc` and `argv` buddies
+* Command shell, to input runtime commands
 * A spinner, with customizable sprites
 * A loading bar, in which you can put a spinner!
 
 ## Option processor
-Include `optionProcessor.h` to your project to make your life simpler. 
+A tool to launch your project quickly and make your life simpler. 
 
     int main(int argc, char** argv)
     {
       ProcessOptions(argc, argv) ({
         BADOPTIONS (               { usage(); }),
         OPTION     ("-a",          { flag_a = true; }),
-        OPTION2    ("-b", "--bye", { prepare(option.arguments); })
+        OPTION2    ("-b", "--bye", { prepare(args); })
       });
 
       ...
 
 * Any argument of your program starting with a `-` will be detected as an option and the following words as option arguments.
 * Options are defined with the `OPTION` and `OPTION2` macros, which should be provided one or two string and a function body.
-* Within that function body, `option.arguments` contains a string vector of option arguments.
-* `BADOPTIONS` is optional and is called if non-defined options are detected. Their names are provided in `option.arguments`.
+* Within that function body, `args` contains a string vector of option arguments.
+* `BADOPTIONS` is optional and is called if non-defined options are detected. Their names are provided in `args`.
+
+## Command shell
+
+The `CommandShell` uses a similar pattern :
+
+    CommandShell("> ", "exit") ({
+      COMMAND ("commandWord", { commandAction(args); }),
+	  DEFAULT ({ processLine(args); }),
+	  EXIT	  ({ exit(0); })
+	});
+
+* The (optional) constructor parameters define the shell symbol and the exit command word
+* Single-word commands can be provided in the COMMAND macro with a function body
+* Any non-defined command will be processed by the function body provided in the (optional) DEFAULT macro
+* In every function body, `args` contains a string vector of the rest of the line's words
+* The exit command has it's own macro for a different processing
+
+Arrow-key detection (to bring up previous commands) is not currently supported to avoid external dependencies.
 
 ## CLI animations
 The following elements can be found in `cliAnimations.h`
