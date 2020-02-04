@@ -10,42 +10,46 @@ using namespace clikit;
   
 int main(int argc, char** argv)
 {
- std::cout << "Command line : ";
-  for (int i = 0; i < argc; ++i)
-    std::cout << argv[i] << " ";
-  std::cout << "\n";
-
+	//
+	// Showcasing option processing
+	//
   ProcessOptions(argc, argv)({
     BADOPTIONS(
     {
       std::cout << "\nBad options detected : ";
-      for (auto& arg : option.arguments)
+      for (auto& arg : args)
         std::cout << arg << " ";
       std::cout << "(we could print usage and exit program)";
     }),
     OPTION("-a", 
     {
       std::cout << "\n-a option";
-      if (option.arguments.size())
+      if (!args.empty())
       {
-        std::cout << " with arguments : ";
-        for (auto& arg : option.arguments)
+        std::cout << " with " << args.size() << " argument(s) : ";
+        for (auto& arg : args)
           std::cout << arg << " ";
       }
     }),
     OPTION2("-b", "--blong", 
     {
       std::cout << "\n-b/--blong option";
-      if (option.arguments.size())
+      if (!args.empty())
       {
         std::cout << " with arguments : ";
-        for (auto& arg : option.arguments)
+        for (auto& arg : args)
           std::cout << arg << " ";
       }
     })
   });
 
-  std::cout << "\n\nDefault loading bar leading to default shell\n";
+	if(argc == 1)
+		std::cout << "No arguments to parse\n";
+	
+	//
+	// Showcasing default loading bar and default command shell
+	//
+	std::cout << "\n\nDefault loading bar leading to default shell\n\n";
   LoadingBar load;
 
   float progress = 0;
@@ -56,26 +60,23 @@ int main(int argc, char** argv)
   }
   std::cout << "\r" << load(1) << std::flush;
 
-  Shell()({
+  CommandShell()({
     COMMAND("such", 
     {
-      std::cout << "much " 
-                << (arguments.size() < 1 
-                ? "nothing" 
-                : arguments[0]);
+      std::cout << "much " << (args.empty() ? "nothing" : args[0]);
     }),
     DEFAULT(
     {
       std::cout << "Default processing with argument(s) : ";
-      for(auto& args : arguments)
-        std::cout << args << " ";
-    }),
-    EXIT({
-      std::cout << "exit command";
+      for(auto& arg : args)
+        std::cout << arg << " ";
     })
   });
 
-  std::cout << "\nCustom loading bar leading to custom shell\n";
+	//
+	// Showcasing customized loading bar with customized command shell
+	//
+  std::cout << "Custom loading bar leading to custom shell\n\n";
 
   Spinner spinner({ "=>", "=<>", "===<", "====<", "===<",  "=<>", "=>" });
   LoadingBar loadCustom(' ', '-', 40, false, spinner);
@@ -89,22 +90,23 @@ int main(int argc, char** argv)
   std::cout << "\r" << loadCustom(1) << std::flush;
 
 
-  Shell("~§~ ", "aveda")({
+  CommandShell("~| ", "aveda")({
     COMMAND("destroy", 
     {
-      for(auto& args : arguments)
-        std::cout << args << " will be destroyed\n";
+      for(auto& arg : args)
+        std::cout << arg << " will be destroyed\n";
     }),
     DEFAULT(
     {
       std::cout << "Default processing with argument(s) : ";
-      for(auto& args : arguments)
-        std::cout << args << " ";
+      for(auto& arg : args)
+        std::cout << arg << " ";
     }),
     EXIT({
       std::cout << "KEDAVRA!! (leaving shell)";
     })
   });
 
+	getchar();
   return 0;
 }

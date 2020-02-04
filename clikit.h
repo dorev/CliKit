@@ -1,5 +1,5 @@
-#ifndef OPTIONPROCESSOR_H
-#define OPTIONPROCESSOR_H
+#ifndef CLIKIT_H
+#define CLIKIT_H
 
 #include <iostream>
 #include <string>
@@ -8,30 +8,32 @@
 #include <functional>
 #include <algorithm>
 
-
 namespace clikit
 {
-  // Shortcut for find/find_if algorithms
-  #define ALL(x) x.begin(), x.end() 
-
-
-
-
 /*
   ProcessOptions is a functor constructed with argc/argv
   and given a list of OptionDefinitions used to parse argv. 
+	
+	CommandShell uses a similar pattern, it is constructed with
+	its line beginning symbol and exit command name
+
 */
+
+// Shortcut for find/find_if algorithms
+#define ALL(x) x.begin(), x.end() 
+
+using StringVector = std::vector<std::string>;
 
 struct Option
 {
   std::string name;
-  std::vector<std::string> arguments;
+  StringVector arguments;
 };
 
 struct OptionDefinition
 {
-  std::vector<std::string> names;
-  std::function<void(const Option&)> lambda;
+  StringVector names;
+  std::function<void(const StringVector&)> lambda;
 };
 
 struct ProcessOptions
@@ -39,7 +41,7 @@ struct ProcessOptions
   int _argc;
   char** _argv;
   int _argvIndex;
-  std::vector<std::string> _commandLine;
+	StringVector _commandLine;
   std::vector<Option> _options;
 
   ProcessOptions(int argc, char** argv)
@@ -66,7 +68,7 @@ struct ProcessOptions
 
   void operator()(std::vector<OptionDefinition> optionDefinitions)
   {
-    std::vector<std::string> definedOptions;
+    StringVector definedOptions;
 
     for(auto& option : optionDefinitions)
       for (auto& name : option.names)
@@ -91,7 +93,7 @@ struct ProcessOptions
 
       // Run "Bad Options" lambda
       if (badOption.arguments.size())
-        badOptionItr->lambda(badOption);
+        badOptionItr->lambda(badOption.arguments);
     }
 
     // Process valid options
@@ -109,29 +111,21 @@ struct ProcessOptions
 
       // Run option lambda
       if (definitionItr != optionDefinitions.end())
-        definitionItr->lambda(option);
+        definitionItr->lambda(option.arguments);
     }
   }
 
-// Shortcut macros
-#define OPTION(opt,lambda)          { { opt }, [&](const Option & option) lambda }
-#define OPTION2(opt1, opt2, lambda) { { opt1, opt2 }, [&](const Option & option) lambda }
-#define BADOPTIONS(lambda)          { {"Bad options"}, [&](const Option & option) lambda }
+	// Shortcut macros
+	#define OPTION(opt,lambda)          { { opt }, [&](const StringVector & args) lambda }
+	#define OPTION2(opt1, opt2, lambda) { { opt1, opt2 }, [&](const StringVector & args) lambda }
+	#define BADOPTIONS(lambda)          { {"Bad options"}, [&](const StringVector& args) lambda }
 
 };
 
-
-
-
-struct CommandDefinition
-{
-  std::string name;
-  std::function<void(const std::vector<std::string>&)> lambda;
-};
-
-
-
-void strsplit(std::vector<std::string>& out, std::string& str, std::string delim = " ")
+/* 
+	Helper function to split string on requested delimiter
+*/
+void strsplit(StringVector& out, std::string& str, std::string delim = " ")
 {
   size_t last = 0;
   size_t next = 0;
@@ -146,18 +140,23 @@ void strsplit(std::vector<std::string>& out, std::string& str, std::string delim
     out.push_back(str.substr(last));
 }
 
+struct CommandDefinition
+{
+  std::string name;
+  std::function<void(const StringVector&)> lambda;
+};
 
-struct Shell
+struct CommandShell
 {
   std::string _shellSymbol;
   std::string _exitCommand;
 
-  Shell()
+  CommandShell()
     : _shellSymbol("> ")
     , _exitCommand("exit")
   {}
 
-  Shell(std::string shellSymbol, std::string exitCommand = "exit")
+  CommandShell(std::string shellSymbol, std::string exitCommand = "exit")
     : _shellSymbol(shellSymbol)
     , _exitCommand(exitCommand)
   {}
@@ -166,37 +165,48 @@ struct Shell
   {
     std::string input = "";
 
+		// Look for unknown commands processing
     auto defaultItr = std::find_if(ALL(commandDefinitions), [&](const CommandDefinition commandDefinition)
     {
       return commandDefinition.name == "Default command";
     });
 
+		// Look for exit command
     auto exitItr = std::find_if(ALL(commandDefinitions), [&](const CommandDefinition commandDefinition)
     {
       return commandDefinition.name == "Exit command";
     });
 
-    bool stayInShell = true;
     std::string line;
-    std::vector<std::string> splittedLine;
+    StringVector splittedLine;
     
+    // Start shell display
     std::cout << "\n";
-      
+    bool stayInShell = true;
     while(stayInShell)
-    {
+    {      
       std::cout << _shellSymbol;
-      
+			
+    	// Capture line on "Enter"
       std::getline(std::cin, line);
-      if(line.size() == 0)
+      
+			// Reset an empty line
+    	if(line.size() == 0)
         continue;
 
+			// Split the line words
       strsplit(splittedLine, line);
 
+			// Look for a known command
       auto commandItr = std::find_if(ALL(commandDefinitions), [&](const CommandDefinition commandDefinition)
       {
         return commandDefinition.name == splittedLine[0];
       });
 
+			// Process input in the following order : 
+    	// 1- exit command 
+    	// 2- known command
+    	// 3- unknown command
       if(splittedLine[0] == _exitCommand)
       {
         if(exitItr != commandDefinitions.end())
@@ -205,6 +215,7 @@ struct Shell
       }   
       else if(commandItr != commandDefinitions.end())
       {
+				// Remove command word
         splittedLine.erase(splittedLine.begin());
         commandItr->lambda(splittedLine);
       }
@@ -213,6 +224,7 @@ struct Shell
         defaultItr->lambda(splittedLine);
       }
 
+			// Clear and loop
       splittedLine.clear();
       line.clear();
       std::cout << "\n";
@@ -221,37 +233,31 @@ struct Shell
     std::cout << "\n";
   }
 
-// Shortcut macros
-#define COMMAND(cmd, lambda)  { cmd, [&](const  std::vector<std::string>& arguments) lambda }
-#define DEFAULT(lambda)       { "Default command", [&](const std::vector<std::string>& arguments) lambda }
-#define EXIT(lambda)          { "Exit command", [&](const std::vector<std::string>& arguments) lambda }
+	// Shortcut macros
+	#define COMMAND(cmd, lambda)  { cmd, [&](const StringVector& args) lambda }
+	#define DEFAULT(lambda)       { "Default command", [&](const StringVector& args) lambda }
+	#define EXIT(lambda)          { "Exit command", [&](const StringVector& args) lambda }
 
 };
-
-
-
-
-
-
-
-
-
 
 struct Spinner
 {
   int _i = 0;
+	StringVector _sprites;
   bool _empty;
-  std::vector<std::string> _sprites;
 
-  Spinner(std::vector<std::string> sprites) 
+  Spinner(StringVector sprites) 
     : _sprites(sprites) 
-    , _empty(sprites.size() == 0)
+    , _empty(sprites.empty())
   {}
 
+	// Get next sprite
   std::string operator()()
   {
     return _empty ? "" : _sprites[_i++ % _sprites.size()];
   }
+
+	// Get size of the next sprite to print
   int spriteSize()
   {
     return _empty ? 0 : _sprites[_i % _sprites.size()].size();
@@ -267,6 +273,7 @@ struct LoadingBar
   char _loadedSymbol;
   char _notLoadedSymbol;
 
+	// Default loading bar
   LoadingBar()
     : _spin({ "-", "\\", "|", "/" }), _length(20)
     , _showPercentage(true)
@@ -275,6 +282,7 @@ struct LoadingBar
     , _notLoadedSymbol(' ')
   {}
 
+	// Custom constructor
   LoadingBar( char loadedSymbol, 
               char notLoadedSymbol = ' ', 
               int length = 20, 
@@ -348,14 +356,8 @@ struct LoadingBar
 
 };
 
-
-
-
-
-
-
 #undef ALL
 
 } // namespace clikit
 
-#endif // OPTIONPROCESSOR_H
+#endif // CLIKIT_H
