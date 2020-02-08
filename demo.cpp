@@ -10,9 +10,9 @@ using namespace clikit;
   
 int main(int argc, char** argv)
 {
-	//
-	// Showcasing option processing
-	//
+  //
+  // Showcasing option processing
+  //
   ProcessOptions(argc, argv)({
     BADOPTIONS(
     {
@@ -43,13 +43,13 @@ int main(int argc, char** argv)
     })
   });
 
-	if(argc == 1)
-		std::cout << "No arguments to parse\n";
-	
-	//
-	// Showcasing default loading bar and default command shell
-	//
-	std::cout << "\n\nDefault loading bar leading to default shell\n\n";
+  if(argc == 1)
+    std::cout << "No arguments to parse\n";
+  
+  //
+  // Showcasing default loading bar and default command shell
+  //
+  std::cout << "\n\nDefault loading bar leading to default shell\n\n";
   LoadingBar load;
 
   float progress = 0;
@@ -73,9 +73,9 @@ int main(int argc, char** argv)
     })
   });
 
-	//
-	// Showcasing customized loading bar with customized command shell
-	//
+  //
+  // Showcasing customized loading bar with customized command shell
+  //
   std::cout << "Custom loading bar leading to custom shell\n\n";
 
   Spinner spinner({ "=>", "=<>", "===<", "====<", "===<",  "=<>", "=>" });
@@ -107,6 +107,6 @@ int main(int argc, char** argv)
     })
   });
 
-	getchar();
+  getchar();
   return 0;
 }

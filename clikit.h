@@ -13,9 +13,9 @@ namespace clikit
 /*
   ProcessOptions is a functor constructed with argc/argv
   and given a list of OptionDefinitions used to parse argv. 
-	
-	CommandShell uses a similar pattern, it is constructed with
-	its line beginning symbol and exit command name
+  
+  CommandShell uses a similar pattern, it is constructed with
+  its line beginning symbol and exit command name
 
 */
 
@@ -41,7 +41,7 @@ struct ProcessOptions
   int _argc;
   char** _argv;
   int _argvIndex;
-	StringVector _commandLine;
+  StringVector _commandLine;
   std::vector<Option> _options;
 
   ProcessOptions(int argc, char** argv)
@@ -115,15 +115,15 @@ struct ProcessOptions
     }
   }
 
-	// Shortcut macros
-	#define OPTION(opt,lambda)          { { opt }, [&](const StringVector & args) lambda }
-	#define OPTION2(opt1, opt2, lambda) { { opt1, opt2 }, [&](const StringVector & args) lambda }
-	#define BADOPTIONS(lambda)          { {"Bad options"}, [&](const StringVector& args) lambda }
+  // Shortcut macros
+  #define OPTION(opt,lambda)          { { opt }, [&](const StringVector & args) lambda }
+  #define OPTION2(opt1, opt2, lambda) { { opt1, opt2 }, [&](const StringVector & args) lambda }
+  #define BADOPTIONS(lambda)          { {"Bad options"}, [&](const StringVector& args) lambda }
 
 };
 
 /* 
-	Helper function to split string on requested delimiter
+  Helper function to split string on requested delimiter
 */
 void strsplit(StringVector& out, std::string& str, std::string delim = " ")
 {
@@ -165,13 +165,13 @@ struct CommandShell
   {
     std::string input = "";
 
-		// Look for unknown commands processing
+    // Look for unknown commands processing
     auto defaultItr = std::find_if(ALL(commandDefinitions), [&](const CommandDefinition commandDefinition)
     {
       return commandDefinition.name == "Default command";
     });
 
-		// Look for exit command
+    // Look for exit command
     auto exitItr = std::find_if(ALL(commandDefinitions), [&](const CommandDefinition commandDefinition)
     {
       return commandDefinition.name == "Exit command";
@@ -186,27 +186,27 @@ struct CommandShell
     while(stayInShell)
     {      
       std::cout << _shellSymbol;
-			
-    	// Capture line on "Enter"
+      
+      // Capture line on "Enter"
       std::getline(std::cin, line);
       
-			// Reset an empty line
-    	if(line.size() == 0)
+      // Reset an empty line
+      if(line.size() == 0)
         continue;
 
-			// Split the line words
+      // Split the line words
       strsplit(splittedLine, line);
 
-			// Look for a known command
+      // Look for a known command
       auto commandItr = std::find_if(ALL(commandDefinitions), [&](const CommandDefinition commandDefinition)
       {
         return commandDefinition.name == splittedLine[0];
       });
 
-			// Process input in the following order : 
-    	// 1- exit command 
-    	// 2- known command
-    	// 3- unknown command
+      // Process input in the following order : 
+      // 1- exit command 
+      // 2- known command
+      // 3- unknown command
       if(splittedLine[0] == _exitCommand)
       {
         if(exitItr != commandDefinitions.end())
@@ -215,7 +215,7 @@ struct CommandShell
       }   
       else if(commandItr != commandDefinitions.end())
       {
-				// Remove command word
+        // Remove command word
         splittedLine.erase(splittedLine.begin());
         commandItr->lambda(splittedLine);
       }
@@ -224,7 +224,7 @@ struct CommandShell
         defaultItr->lambda(splittedLine);
       }
 
-			// Clear and loop
+      // Clear and loop
       splittedLine.clear();
       line.clear();
       std::cout << "\n";
@@ -233,17 +233,17 @@ struct CommandShell
     std::cout << "\n";
   }
 
-	// Shortcut macros
-	#define COMMAND(cmd, lambda)  { cmd, [&](const StringVector& args) lambda }
-	#define DEFAULT(lambda)       { "Default command", [&](const StringVector& args) lambda }
-	#define EXIT(lambda)          { "Exit command", [&](const StringVector& args) lambda }
+  // Shortcut macros
+  #define COMMAND(cmd, lambda)  { cmd, [&](const StringVector& args) lambda }
+  #define DEFAULT(lambda)       { "Default command", [&](const StringVector& args) lambda }
+  #define EXIT(lambda)          { "Exit command", [&](const StringVector& args) lambda }
 
 };
 
 struct Spinner
 {
   int _i = 0;
-	StringVector _sprites;
+  StringVector _sprites;
   bool _empty;
 
   Spinner(StringVector sprites) 
@@ -251,13 +251,13 @@ struct Spinner
     , _empty(sprites.empty())
   {}
 
-	// Get next sprite
+  // Get next sprite
   std::string operator()()
   {
     return _empty ? "" : _sprites[_i++ % _sprites.size()];
   }
 
-	// Get size of the next sprite to print
+  // Get size of the next sprite to print
   int spriteSize()
   {
     return _empty ? 0 : _sprites[_i % _sprites.size()].size();
@@ -273,7 +273,7 @@ struct LoadingBar
   char _loadedSymbol;
   char _notLoadedSymbol;
 
-	// Default loading bar
+  // Default loading bar
   LoadingBar()
     : _spin({ "-", "\\", "|", "/" }), _length(20)
     , _showPercentage(true)
@@ -282,7 +282,7 @@ struct LoadingBar
     , _notLoadedSymbol(' ')
   {}
 
-	// Custom constructor
+  // Custom constructor
   LoadingBar( char loadedSymbol, 
               char notLoadedSymbol = ' ', 
               int length = 20, 
