@@ -13,8 +13,16 @@ int main(int argc, char** argv)
     // Showcasing option processing
     //
     ProcessOptions(argc, argv)({
-        BADOPTIONS(
-        {
+        FIRSTARGS
+        ({
+            std::cout << "Arguments before first option detected : ";
+            for (auto& arg : args)
+            {
+                std::cout << arg << " ";
+            }
+        }),
+        BADOPTIONS
+        ({
             std::cout << "\nBad options detected : ";
             for (auto& arg : args)
             {
