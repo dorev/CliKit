@@ -20,29 +20,33 @@ int main(int argc, char** argv)
             {
                 std::cout << arg << " ";
             }
+            std::cout << "\n";
         }),
         BADOPTIONS
         ({
-            std::cout << "\nBad options detected : ";
+            std::cout << "Bad options detected : ";
             for (auto& arg : args)
             {
                 std::cout << arg << " ";
             }
-            std::cout << "(we could print usage and exit program)";
+            std::cout << "(we could print usage and exit program\n";
         }),
-        OPTION("-a", 
+        OPTION("-a", "test usage -a",
         {
-            std::cout << "\n-a option";
+            std::cout << "-a option";
             if (!args.empty())
             {
                 std::cout << " with " << args.size() << " argument(s) : ";
                 for (auto& arg : args)
+                {
                     std::cout << arg << " ";
+                }
             }
+            std::cout << "\n";
         }),
-        OPTION("-b,--blong", 
+        OPTION("-b,--blong", "test usage -b",
         {
-            std::cout << "\n-b/--blong option";
+            std::cout << "-b/--blong option";
             if (!args.empty())
             {
                 std::cout << " with arguments : ";
@@ -51,8 +55,12 @@ int main(int argc, char** argv)
                     std::cout << arg << " ";
                 }
             }
+            std::cout << "\n";
         })
     });
+
+    clikit::usage.setIntro("CliKit demo usage :\nCliKitDemo [args...] [-a [options...]] [-b|--blong [options...]]");
+    clikit::usage();
 
     if (argc == 1)
     {

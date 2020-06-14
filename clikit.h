@@ -2,6 +2,7 @@
 #define CLIKIT_H
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -63,6 +64,61 @@ namespace clikit
          return output;
      }
 
+     class Usage
+     {
+         friend class ProcessOptions;
+         struct UsageEntry
+         {
+             vector<string> names;
+             string description;
+         };
+
+         vector<UsageEntry> _entries;
+         string _intro;
+
+         void add(vector<string> names, string description)
+         {
+             _entries.push_back({ names, description });
+         }
+
+     public:
+         Usage() : _intro("") {}
+
+         void setIntro(string intro)
+         {
+             _intro = intro;
+         }
+
+         void operator()()
+         {
+             cout << "\n"<< _intro <<"\n";
+
+             for (auto& entry : _entries)
+             {
+                 if (entry.names[0] == "First args" || entry.names[0] == "Bad options")
+                 {
+                     continue;
+                 }
+
+                 string concatOptions;
+                 for (int i = 0; i < entry.names.size(); i++)
+                 {
+                     concatOptions += entry.names[i];
+                     if (i < entry.names.size() - 1)
+                     {
+                         concatOptions += ", ";
+                     }
+                 }
+
+                 cout << left << setw(20) << concatOptions << entry.description << "\n";
+             }
+
+            cout << "\n";
+         }
+     };
+
+     static Usage usage;
+
     struct Option
     {
         string name;
@@ -73,9 +129,10 @@ namespace clikit
     {
         vector<string> names;
         function<void(const vector<string>&)> lambda;
+        string usage;
     };
 
-    struct ProcessOptions
+    class ProcessOptions
     {
         int _argc;
         char** _argv;
@@ -83,7 +140,9 @@ namespace clikit
         vector<string> _commandLine;
         vector<Option> _options;
         Option _firstArgs;
-
+    
+    public:
+    
         ProcessOptions(int argc, char** argv)
             : _argc(argc)
             , _argv(argv)
@@ -122,13 +181,17 @@ namespace clikit
         {
             vector<string> definedOptions;
 
+            // List defined options to know when to call "Bad Options"
             for (auto& option : optionDefinitions)
             {
                 for (auto& name : option.names)
                 {
                     definedOptions.push_back(name);
                 }
+
+                usage.add(option.names, option.usage);
             }
+
             // Check if "First args" is present
             auto firstArgsItr = find_if(ALL(optionDefinitions), [&](const OptionDefinition& definition)
             {
@@ -188,9 +251,9 @@ namespace clikit
         }
 
         // Shortcut macros
-        #define OPTION(names, lambda)   { strsplit(names,","),  [&](const vector<string> & args) lambda }
-        #define FIRSTARGS(lambda)       { {"First args"     },  [&](const vector<string> & args) lambda }
-        #define BADOPTIONS(lambda)      { {"Bad options"    },  [&](const vector<string> & args) lambda }
+        #define OPTION(names, usage, lambda) { strsplit(names,","),  [&](const vector<string> & args) lambda, usage }
+        #define FIRSTARGS(lambda)            { {"First args"     },  [&](const vector<string> & args) lambda }
+        #define BADOPTIONS(lambda)           { {"Bad options"    },  [&](const vector<string> & args) lambda }
 
     };
 
