@@ -26,22 +26,42 @@ namespace clikit
     /*
         Helper function to split string on requested delimiter
     */
-    void strsplit(vector<string>& out, string& str, string delim = " ")
-    {
-        size_t last = 0;
-        size_t next = 0;
+     void strsplit(vector<string>& out, string& str, string delim = " ")
+     {
+         size_t last = 0;
+         size_t next = 0;
 
-        while ((next = str.find(delim, last)) != string::npos)
-        {
-            out.push_back(str.substr(last, next - last));
-            last = next + delim.size();
-        }
+         while ((next = str.find(delim, last)) != string::npos)
+         {
+             out.push_back(str.substr(last, next - last));
+             last = next + delim.size();
+         }
 
-        if (last < str.size())
-        {
-            out.push_back(str.substr(last));
-        }
-    }
+         if (last < str.size())
+         {
+             out.push_back(str.substr(last));
+         }
+     }
+
+     vector<string> strsplit(string str, string delim = " ")
+     {
+         size_t last = 0;
+         size_t next = 0;
+         vector<string> output;
+
+         while ((next = str.find(delim, last)) != string::npos)
+         {
+             output.push_back(str.substr(last, next - last));
+             last = next + delim.size();
+         }
+
+         if (last < str.size())
+         {
+             output.push_back(str.substr(last));
+         }
+
+         return output;
+     }
 
     struct Option
     {
@@ -168,10 +188,9 @@ namespace clikit
         }
 
         // Shortcut macros
-        #define FIRSTARGS(lambda)                    { { "First args" }, [&](const vector<string> & args) lambda }
-        #define OPTION(opt,lambda)                    { { opt }, [&](const vector<string> & args) lambda }
-        #define OPTION2(opt1, opt2, lambda) { { opt1, opt2 }, [&](const vector<string> & args) lambda }
-        #define BADOPTIONS(lambda)                    { {"Bad options"}, [&](const vector<string>& args) lambda }
+        #define OPTION(names, lambda)   { strsplit(names,","),  [&](const vector<string> & args) lambda }
+        #define FIRSTARGS(lambda)       { {"First args"     },  [&](const vector<string> & args) lambda }
+        #define BADOPTIONS(lambda)      { {"Bad options"    },  [&](const vector<string> & args) lambda }
 
     };
 

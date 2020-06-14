@@ -40,7 +40,7 @@ int main(int argc, char** argv)
                     std::cout << arg << " ";
             }
         }),
-        OPTION2("-b", "--blong", 
+        OPTION("-b,--blong", 
         {
             std::cout << "\n-b/--blong option";
             if (!args.empty())
