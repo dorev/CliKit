@@ -251,9 +251,9 @@ namespace clikit
         }
 
         // Shortcut macros
-        #define OPTION(names, usage, lambda) { strsplit(names,","),  [&](const vector<string> & args) lambda, usage }
-        #define FIRSTARGS(lambda)            { {"First args"     },  [&](const vector<string> & args) lambda }
-        #define BADOPTIONS(lambda)           { {"Bad options"    },  [&](const vector<string> & args) lambda }
+        #define OPTION(names, usage, lambda) { clikit::strsplit(names,","), [&](const vector<string> & args) lambda, usage }
+        #define FIRSTARGS(lambda)            { {"First args" }, [&](const vector<string> & args) lambda }
+        #define BADOPTIONS(lambda)           { {"Bad options"}, [&](const vector<string> & args) lambda }
 
     };
 
